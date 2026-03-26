@@ -37,7 +37,7 @@ const TRACK_LABEL = {
 
 export default function OrderDetail() {
   const { id } = useParams();
-  const { session } = useAuth();
+  const { session, profile } = useAuth();
   const [order, setOrder] = useState(null);
   const [err, setErr] = useState('');
   const [deliveryForm, setDeliveryForm] = useState({
@@ -155,7 +155,7 @@ export default function OrderDetail() {
   return (
     <div>
       <p>
-        <Link to="/">← Danh sách</Link>
+        <Link to={profile?.role === 'admin' ? '/admin/orders' : '/staff/orders'}>← Danh sách</Link>
       </p>
       <h1 style={{ fontSize: '1.35rem' }}>
         {order.code}{' '}

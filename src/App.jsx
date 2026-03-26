@@ -1,10 +1,16 @@
 import { Routes, Route, NavLink, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './AuthContext.jsx';
 import Login from './pages/Login.jsx';
-import Orders from './pages/Orders.jsx';
+import Register from './pages/Register.jsx';
 import OrderNew from './pages/OrderNew.jsx';
 import OrderDetail from './pages/OrderDetail.jsx';
 import Admin from './pages/Admin.jsx';
+import StaffLayout from './pages/staff/StaffLayout.jsx';
+import StaffDashboard from './pages/staff/StaffDashboard.jsx';
+import StaffOrders from './pages/staff/StaffOrders.jsx';
+import StaffShipping from './pages/staff/StaffShipping.jsx';
+import StaffReports from './pages/staff/StaffReports.jsx';
+import StaffPlaceholder from './pages/staff/StaffPlaceholder.jsx';
 
 function Shell({ children }) {
   const { session, profile, supabase: client } = useAuth();
@@ -54,6 +60,21 @@ function AdminRoute({ children }) {
   return children;
 }
 
+function RoleRedirect() {
+  const { profile, loading } = useAuth();
+  if (loading) return <div className="layout muted">Đang tải…</div>;
+  if (profile?.role === 'admin') return <Navigate to="/admin" replace />;
+  return <Navigate to="/staff" replace />;
+}
+
+function StaffRouteGuard({ children }) {
+  const { profile, loading } = useAuth();
+  if (loading) return <div className="layout muted">Đang tải…</div>;
+  if (profile?.role === 'admin') return <Navigate to="/admin" replace />;
+  if (profile?.role !== 'admin') return children;
+  return <Navigate to="/staff" replace />;
+}
+
 export default function App() {
   return (
     <AuthProvider>
@@ -67,12 +88,138 @@ export default function App() {
           }
         />
         <Route
+          path="/register"
+          element={
+            <Shell>
+              <Register />
+            </Shell>
+          }
+        />
+        <Route
           path="/"
           element={
             <PrivateRoute>
-              <Shell>
-                <Orders />
-              </Shell>
+              <RoleRedirect />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/staff"
+          element={
+            <PrivateRoute>
+              <StaffRouteGuard>
+                <StaffLayout>
+                  <StaffDashboard />
+                </StaffLayout>
+              </StaffRouteGuard>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/staff/orders"
+          element={
+            <PrivateRoute>
+              <StaffRouteGuard>
+                <StaffLayout>
+                  <StaffOrders />
+                </StaffLayout>
+              </StaffRouteGuard>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/staff/orders/new"
+          element={
+            <PrivateRoute>
+              <StaffRouteGuard>
+                <StaffLayout>
+                  <OrderNew />
+                </StaffLayout>
+              </StaffRouteGuard>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/staff/orders/:id"
+          element={
+            <PrivateRoute>
+              <StaffRouteGuard>
+                <StaffLayout>
+                  <OrderDetail />
+                </StaffLayout>
+              </StaffRouteGuard>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/staff/purchase"
+          element={
+            <PrivateRoute>
+              <StaffRouteGuard>
+                <StaffLayout>
+                  <StaffPlaceholder title="Purchase (demo)" />
+                </StaffLayout>
+              </StaffRouteGuard>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/staff/shipping"
+          element={
+            <PrivateRoute>
+              <StaffRouteGuard>
+                <StaffLayout>
+                  <StaffShipping />
+                </StaffLayout>
+              </StaffRouteGuard>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/staff/finance"
+          element={
+            <PrivateRoute>
+              <StaffRouteGuard>
+                <StaffLayout>
+                  <StaffDashboard />
+                </StaffLayout>
+              </StaffRouteGuard>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/staff/reports"
+          element={
+            <PrivateRoute>
+              <StaffRouteGuard>
+                <StaffLayout>
+                  <StaffReports />
+                </StaffLayout>
+              </StaffRouteGuard>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/staff/staff"
+          element={
+            <PrivateRoute>
+              <StaffRouteGuard>
+                <StaffLayout>
+                  <StaffPlaceholder title="Staff (demo)" />
+                </StaffLayout>
+              </StaffRouteGuard>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/staff/settings"
+          element={
+            <PrivateRoute>
+              <StaffRouteGuard>
+                <StaffLayout>
+                  <StaffPlaceholder title="Settings (demo)" />
+                </StaffLayout>
+              </StaffRouteGuard>
             </PrivateRoute>
           }
         />
@@ -80,9 +227,9 @@ export default function App() {
           path="/orders/new"
           element={
             <PrivateRoute>
-              <Shell>
+              <StaffLayout>
                 <OrderNew />
-              </Shell>
+              </StaffLayout>
             </PrivateRoute>
           }
         />
@@ -90,20 +237,18 @@ export default function App() {
           path="/orders/:id"
           element={
             <PrivateRoute>
-              <Shell>
+              <StaffLayout>
                 <OrderDetail />
-              </Shell>
+              </StaffLayout>
             </PrivateRoute>
           }
         />
         <Route
-          path="/admin"
+          path="/admin/*"
           element={
             <PrivateRoute>
               <AdminRoute>
-                <Shell>
-                  <Admin />
-                </Shell>
+                <Admin />
               </AdminRoute>
             </PrivateRoute>
           }
